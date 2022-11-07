@@ -1,0 +1,23 @@
+ - name: Removing LAMP packages
+   hosts: test
+   become: true
+   tasks: 
+    - name: Removing apache2
+      apt:
+        name: apache2
+        state: absent
+        force_apt_get: yes
+        update_cache: yes
+when: ansible_distribution == "Ubuntu"
+    - name: Removing mysql-server
+      apt:
+        name: mysql-server
+        state: absent
+        force_apt_get: yes
+        update_cache: yes
+    - name: Removing php
+      apt:
+        name: php8.1-*
+        state: absent
+        force_apt_get: yes
+        update_cache: yes
