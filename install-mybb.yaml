@@ -1,0 +1,70 @@
+ - name: Installing mybb
+   hosts: test
+   become: true
+   tasks: 
+    - name: Installing unzip
+      apt:
+        name: unzip
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Installing apache2
+      apt:
+        name: apache2
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Installing mysql
+      apt:
+        name: mysql-server
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Adding PHP repo
+      ansible.builtin.shell:
+        cmd: add-apt-repository ppa:ondrej/php
+        cmd: apt update
+    - name: Installing PHP 8.1
+      apt:
+        name: php8.1
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Installing PHP 8.1 Extentions
+      apt:
+        name: php8.1-simplexml
+        name: php8.1-gd
+        name: php8.1-mbstring
+        name: php8.1-pdo
+        name: php8.1-mysql
+        state: present
+        force_apt_get: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Downloading MYBB 1.8.31
+      ansible.builtin.get_url:
+        url: https://resources.mybb.com/downloads/mybb_1831.zip
+        dest: /var/www/html
+    - name: Unzipping mybb
+      ansible.builtin.shell:
+        chdir: /var/www/html
+        cmd: unzip mybb_1831.zip
+    - name: Preparing mybb
+      ansible.builtin.shell:
+        chdir: /var/www/html/Upload
+        cmd: mv * .. 
+    - name: Cleaning up
+      ansible.builtin.shell:
+        chdir: /var/www/html/Upload
+        cmd: rm -rf Documentation && rm -rf Upload
+    - name: Setting permissions for /var/www/html
+      ansible.builtin.shell:
+        chdir: /var/www/html/
+        cmd: chown -R www-data:www-data /var/www/html
+    - name: Restarting apache2
+      ansible.builtin.shell:
+        chdir: /var/www/html/
+        cmd: systemctl restart apache2
