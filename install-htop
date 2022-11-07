@@ -1,0 +1,10 @@
+ - name: Installing htop package
+   hosts: test
+   become: true
+   tasks: 
+    - name: Installing htop
+      apt:
+        name: htop
+        state: present
+        force_apt_get: yes
+        update_cache: yes
