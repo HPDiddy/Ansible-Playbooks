@@ -1,0 +1,53 @@
+ - name: Installing packages for wordpress
+   hosts: test
+   become: true
+   tasks: 
+    - name: Installing apache2
+      apt:
+        name: apache2
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Installing mysql
+      apt:
+        name: mysql-server
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Adding PHP repo
+      ansible.builtin.shell:
+        cmd: add-apt-repository ppa:ondrej/php
+        cmd: apt update
+    - name: Installing PHP 8.1
+      apt:
+        name: php8.1
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Downloading The latest version of wordpress
+      ansible.builtin.get_url:
+        url: https://wordpress.org/latest.zip
+        dest: /var/www/html
+    - name: Unzipping wordpress
+      ansible.builtin.shell:
+        chdir: /var/www/html
+        cmd: unzip wordpress-6.1.zip
+    - name: Preparing wordpress
+      ansible.builtin.shell:
+        chdir: /var/www/html/wordpress/
+        cmd: mv * /var/www/html
+    - name: Cleaning up
+      ansible.builtin.shell:
+        chdir: /var/www/html/
+        cmd: rm -rf wordpress
+    - name: Setting permissions for /var/www/html
+      ansible.builtin.shell:
+        chdir: /var/www/html/
+        cmd: chown -R www-data:www-data /var/www/html
+    - name: Restarting apache2
+      ansible.builtin.shell:
+        chdir: /var/www/html/
+        cmd: systemctl restart apache2
