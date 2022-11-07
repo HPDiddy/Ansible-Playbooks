@@ -1,0 +1,29 @@
+ - name: Installing LAMP packages
+   hosts: test
+   become: true
+   tasks: 
+    - name: Installing apache2
+      apt:
+        name: apache2
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Installing mysql
+      apt:
+        name: mysql-server
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Adding PHP repo
+      ansible.builtin.shell:
+        cmd: add-apt-repository ppa:ondrej/php
+        cmd: apt update
+    - name: Installing PHP 8.1
+      apt:
+        name: php8.1
+        state: present
+        force_apt_get: yes
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
